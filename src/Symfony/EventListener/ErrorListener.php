@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Symfony\EventListener;
 
-use ApiPlatform\Api\IdentifiersExtractorInterface as LegacyIdentifiersExtractorInterface;
-use ApiPlatform\Api\ResourceClassResolverInterface as LegacyResourceClassResolverInterface;
 use ApiPlatform\Metadata\Error as ErrorOperation;
 use ApiPlatform\Metadata\Exception\HttpExceptionInterface;
 use ApiPlatform\Metadata\Exception\ProblemExceptionInterface;
@@ -26,7 +24,8 @@ use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Util\ContentNegotiationTrait;
 use ApiPlatform\State\ApiResource\Error;
 use ApiPlatform\State\Util\OperationRequestInitiatorTrait;
-use ApiPlatform\Symfony\Util\RequestAttributesExtractor;
+use ApiPlatform\State\Util\RequestAttributesExtractor;
+use ApiPlatform\Symfony\Validator\Exception\ConstraintViolationListAwareExceptionInterface as LegacyConstraintViolationListAwareExceptionInterface;
 use ApiPlatform\Validator\Exception\ConstraintViolationListAwareExceptionInterface;
 use Negotiation\Negotiator;
 use Psr\Log\LoggerInterface;
@@ -57,8 +56,8 @@ final class ErrorListener extends SymfonyErrorListener
         private readonly array $errorFormats = [],
         private readonly array $exceptionToStatus = [],
         /** @phpstan-ignore-next-line we're not using this anymore but keeping for bc layer */
-        private readonly IdentifiersExtractorInterface|LegacyIdentifiersExtractorInterface|null $identifiersExtractor = null,
-        private readonly ResourceClassResolverInterface|LegacyResourceClassResolverInterface|null $resourceClassResolver = null,
+        private readonly ?IdentifiersExtractorInterface $identifiersExtractor = null,
+        private readonly ?ResourceClassResolverInterface $resourceClassResolver = null,
         ?Negotiator $negotiator = null,
         private readonly bool $problemCompliantErrors = true,
     ) {
@@ -192,7 +191,7 @@ final class ErrorListener extends SymfonyErrorListener
             return 400;
         }
 
-        if ($exception instanceof ConstraintViolationListAwareExceptionInterface) {
+        if ($exception instanceof ConstraintViolationListAwareExceptionInterface || $exception instanceof LegacyConstraintViolationListAwareExceptionInterface) {
             return 422;
         }
 

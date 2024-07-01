@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\HeaderParameter;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Parameter;
 use ApiPlatform\Metadata\QueryParameter;
+use ApiPlatform\OpenApi\Model\Parameter as OpenApiParameter;
 use ApiPlatform\Serializer\Filter\GroupFilter;
 use ApiPlatform\Tests\Fixtures\TestBundle\Parameter\CustomGroupParameterProvider;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -37,14 +38,28 @@ use Symfony\Component\Serializer\Attribute\Groups;
         'auth' => new HeaderParameter(provider: [self::class, 'restrictAccess']),
         'priority' => new QueryParameter(provider: [self::class, 'assertSecond'], priority: 10),
         'priorityb' => new QueryParameter(provider: [self::class, 'assertFirst'], priority: 20),
-        'array' => new QueryParameter(provider: [self::class, 'assertArray']),
+        'array' => new QueryParameter(provider: [self::class, 'assertArray'], openApi: false),
     ],
     provider: [self::class, 'provide']
 )]
 #[GetCollection(
-    uriTemplate: 'with_parameters_collection',
+    uriTemplate: 'with_parameters_collection{._format}',
     parameters: [
         'hydra' => new QueryParameter(property: 'a', required: true),
+    ],
+    provider: [self::class, 'collectionProvider']
+)]
+#[GetCollection(
+    uriTemplate: 'validate_parameters{._format}',
+    parameters: [
+        'enum' => new QueryParameter(schema: ['enum' => ['a', 'b'], 'uniqueItems' => true]),
+        'num' => new QueryParameter(schema: ['minimum' => 1, 'maximum' => 3]),
+        'exclusiveNum' => new QueryParameter(schema: ['exclusiveMinimum' => 1, 'exclusiveMaximum' => 3]),
+        'blank' => new QueryParameter(openApi: new OpenApiParameter(name: 'blank', in: 'query', allowEmptyValue: false)),
+        'length' => new QueryParameter(schema: ['maxLength' => 1, 'minLength' => 3]),
+        'array' => new QueryParameter(schema: ['minItems' => 2, 'maxItems' => 3]),
+        'multipleOf' => new QueryParameter(schema: ['multipleOf' => 2]),
+        'pattern' => new QueryParameter(schema: ['pattern' => '/\d/']),
     ],
     provider: [self::class, 'collectionProvider']
 )]

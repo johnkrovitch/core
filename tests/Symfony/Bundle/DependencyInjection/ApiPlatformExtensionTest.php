@@ -27,9 +27,6 @@ use ApiPlatform\Doctrine\Orm\State\ItemProvider;
 use ApiPlatform\Elasticsearch\Extension\RequestBodySearchCollectionExtensionInterface;
 use ApiPlatform\Elasticsearch\Filter\MatchFilter;
 use ApiPlatform\Elasticsearch\Filter\TermFilter;
-use ApiPlatform\Exception\ExceptionInterface;
-use ApiPlatform\Exception\FilterValidationException;
-use ApiPlatform\Exception\InvalidArgumentException;
 use ApiPlatform\GraphQl\Error\ErrorHandlerInterface;
 use ApiPlatform\GraphQl\Resolver\MutationResolverInterface;
 use ApiPlatform\GraphQl\Resolver\QueryCollectionResolverInterface;
@@ -38,6 +35,8 @@ use ApiPlatform\GraphQl\Serializer\SerializerContextBuilderInterface as GraphQlS
 use ApiPlatform\GraphQl\Type\Definition\TypeInterface as GraphQlTypeInterface;
 use ApiPlatform\JsonSchema\SchemaFactoryInterface;
 use ApiPlatform\JsonSchema\TypeFactoryInterface;
+use ApiPlatform\Metadata\Exception\ExceptionInterface;
+use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\FilterInterface;
 use ApiPlatform\Metadata\IdentifiersExtractorInterface;
 use ApiPlatform\Metadata\IriConverterInterface;
@@ -49,6 +48,7 @@ use ApiPlatform\Metadata\UrlGeneratorInterface;
 use ApiPlatform\OpenApi\Factory\OpenApiFactoryInterface;
 use ApiPlatform\OpenApi\Options;
 use ApiPlatform\OpenApi\Serializer\OpenApiNormalizer;
+use ApiPlatform\ParameterValidator\Exception\ValidationException;
 use ApiPlatform\Serializer\Filter\GroupFilter;
 use ApiPlatform\Serializer\Filter\PropertyFilter;
 use ApiPlatform\Serializer\SerializerContextBuilderInterface;
@@ -145,7 +145,7 @@ class ApiPlatformExtensionTest extends TestCase
         'exception_to_status' => [
             ExceptionInterface::class => Response::HTTP_BAD_REQUEST,
             InvalidArgumentException::class => Response::HTTP_BAD_REQUEST,
-            FilterValidationException::class => Response::HTTP_BAD_REQUEST,
+            ValidationException::class => Response::HTTP_BAD_REQUEST,
             OptimisticLockException::class => Response::HTTP_CONFLICT,
         ],
         'show_webby' => true,
@@ -505,6 +505,16 @@ class ApiPlatformExtensionTest extends TestCase
 
         // swagger_ui.xml
         $this->assertServiceHasTags('api_platform.swagger.listener.ui', ['kernel.event_listener']);
+    }
+
+    public function testSwaggerUiDisabled(): void
+    {
+        $config = self::DEFAULT_CONFIG;
+        $config['api_platform']['enable_swagger_ui'] = false;
+
+        (new ApiPlatformExtension())->load($config, $this->container);
+
+        $this->assertNotContainerHasService('api_platform.swagger_ui.provider');
     }
 
     public function testJsonApiConfiguration(): void

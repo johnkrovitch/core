@@ -1,20 +1,130 @@
 # Changelog
 
+## v3.3.7
+
+### Bug fixes
+
+* [0ed1b637a](https://github.com/api-platform/core/commit/0ed1b637a84d0860c2e014e2473b52d17de9276b) fix(metadata): wrong schema generated if openapicontext set on array (#6431)
+* [57f930c65](https://github.com/api-platform/core/commit/57f930c65cb067b1727488ba6db6188c6c5a01c6) fix(openapi): parameters can disable openapi (#6440)
+* [69b4d35b9](https://github.com/api-platform/core/commit/69b4d35b9764e36dab0484e1a7332886e1de9b2c) fix(state): provider as ParameterProviderInterface (#6430)
+* [842091ddf](https://github.com/api-platform/core/commit/842091ddf5b41c7a0d76bfbcddccff2920a84c35) fix(jsonschema): make all required properties optional in PATCH operation with 'json' format (#6394)
+* [af34e72ed](https://github.com/api-platform/core/commit/af34e72ed6bb0d5f7235fcc9c2a6c7810ba4f9c2) fix(openapi): yaml openapi export should have numeric keys as string (#6436)
+* [b42e25f2d](https://github.com/api-platform/core/commit/b42e25f2dcb5e0c1759c9482c08c9929ef86dc90) fix(state): parameter decorates main chain (#6434)
+* [c922ba3f5](https://github.com/api-platform/core/commit/c922ba3f5cf6117e85548697a982fb1cbe3dde2e) fix(symfony): check method for readonly routes (#6437)
+
+## v3.3.6
+
+### Bug fixes
+
+* [8e253d4d7](https://github.com/api-platform/core/commit/8e253d4d76c25c27c233b3cf4fd2314b13c1e193) fix(graphql): validate after resolver (#6426)
+* [d66769069](https://github.com/api-platform/core/commit/d66769069fda051e4ddc7be50764c3f34d055ad0) fix(symfony): load swagger_ui when enabled (#6424)
+* [e06c88b71](https://github.com/api-platform/core/commit/e06c88b7149da4e5b691d432f11ec3d27e41750a) fix(metadata): add some phpdoc annotations to ORM (#6387)
+* [fb7c4658c](https://github.com/api-platform/core/commit/fb7c4658c327c9628bcc86d42e85c3546a74d993) fix(test): canonicalizing json arrays (#6386)
+* [ff533565d](https://github.com/api-platform/core/commit/ff533565d9b976fcda818ab4f79a5a2642f14a32) fix(doctrine): use null-safe operator when retrieving parameters (#6423)
+
+Notes:
+
+The patch at #6426 introduces a new `validateAfterResolver` option to mitigate the BC-break introduced in 3.3 that does the validation before calling the resolver:
+
+```php
+new Mutation(
+    resolver: 'app.graphql.mutation_resolver.activity_log',
+    name: 'create',
+    validateAfterResolver: true,
+    validate: false
+)
+```
+
+## v3.3.5
+
+### Bug fixes
+
+* [55f27dc7a](https://github.com/api-platform/core/commit/55f27dc7adbf2456ec7700dd57e10c036eb260c0) fix(symfony): documentation request _format (#6390)
+
+## v3.3.4
+
+### Bug fixes
+
+* [002d8e514](https://github.com/api-platform/core/commit/002d8e51490dbe9f5d8e5551226d70db8a33c706) fix(validation): ValidationException causes TypeError exception when called with $code=null (#6375)
+* [77a917f2a](https://github.com/api-platform/core/commit/77a917f2a51b50af84bdc96c1a32ff671b3951db) fix(metadata): resource class php doc (#6381)
+* [d809315fb](https://github.com/api-platform/core/commit/d809315fbb3822dbc6fe50d5c908183f4428f0f2) fix(symfony): store original data without clone (#6367)
+* [fb7c4658c](https://github.com/api-platform/core/commit/fb7c4658c327c9628bcc86d42e85c3546a74d993) fix(test): canonicalizing json arrays (#6386)
+
+## v3.3.3
+
+### Bug fixes
+
+* [10f24f7a1](https://github.com/api-platform/core/commit/10f24f7a18649f5d463ce0a99759e9b514707e92) fix(state): no location header without output (#6356)
+* [20c9165f2](https://github.com/api-platform/core/commit/20c9165f240e0457d1f5c9e2760b980e7d61f777) fix(symfony): no read should not throw on wrong uri variables (#6359)
+* [4cd359d40](https://github.com/api-platform/core/commit/4cd359d400608340b09597d24e03f9ff1dc2f9ec) fix(graphql): resolver before validation (#6363)
+* [9d159f4fa](https://github.com/api-platform/core/commit/9d159f4fa2d411f00911cfc5679b81585907d053) fix(symfony): no read shouldn't throw InvalidIdentifiers (#6357)
+
+## v3.3.2
+
+### Bug fixes
+
+* [6f806f4ee](https://github.com/api-platform/core/commit/6f806f4eeec3d120da7a4c145f9dbda9bd4be2ed) fix(state): read without output (#6347)
+* [735e1509e](https://github.com/api-platform/core/commit/735e1509ef67deb1c4c837ff86b445f40e2f7c8b) fix(symfony): set normalization context in request attributes (#6345)
+* [b4984126a](https://github.com/api-platform/core/commit/b4984126a109ec7951012614616035035978b255) fix(symfony): use_symfony_listeners before registering services (#6350)
+* [f63fd8101](https://github.com/api-platform/core/commit/f63fd8101f8211707806e013668f50dafab2865d) fix(symfony): define use_symfony_listeners (#6344)
+
+### Notes
+
+You can remove the `event_listeners_backward_compatibility_layer` flag and set `use_symfony_listeners` instead. The `use_symfony_listeners` should be `true` if you use controllers or if you rely on Symfony event listeners. Note that now flags like `read` can be forced to `true` if you want to call a Provider even on `POST` operations. These are the rules we set up on runtime if no value has been set:
+
+```php
+if (null === $operation->canValidate()) {
+    $operation = $operation->withValidate(!$request->isMethodSafe() && !$request->isMethod('DELETE'));
+}
+
+if (null === $operation->canRead()) {
+    $operation = $operation->withRead($operation->getUriVariables() || $request->isMethodSafe());
+}
+
+if (null === $operation->canDeserialize()) {
+    $operation = $operation->withDeserialize(\in_array($operation->getMethod(), ['POST', 'PUT', 'PATCH'], true));
+}
+```
+
+Previously listeners did the checks before reading our flags and you could not force the values.
+
+When using GraphQl, with `event_listeners_backward_compatibility_layer: true`, mutation resolver gets called before validation, when using `false` (the future default) validation occurs on the user's input.
+
+## v3.3.1 (pre-release)
+
+### Bug fixes
+
+* [6f806f4ee](https://github.com/api-platform/core/commit/6f806f4eeec3d120da7a4c145f9dbda9bd4be2ed) fix(state): read without output (#6347)
+* [735e1509e](https://github.com/api-platform/core/commit/735e1509ef67deb1c4c837ff86b445f40e2f7c8b) fix(symfony): set normalization context in request attributes (#6345)
+* [f63fd8101](https://github.com/api-platform/core/commit/f63fd8101f8211707806e013668f50dafab2865d) fix(symfony): define use_symfony_listeners (#6344)
+
+## v3.3.0
+
+### Bug fixes
+
+* [629da787b](https://github.com/api-platform/core/commit/629da787bc49fe06db02933d41dc550aee87b429) fix(symfony): use non deprecated validator exception (#6297)
+* [8a232a474](https://github.com/api-platform/core/commit/8a232a474466f4fbcf2001d6894fa0fec272ae6e) fix: add legacy FilterInterface as return type of getFilter function (#6311)
+* [97c8ae26e](https://github.com/api-platform/core/commit/97c8ae26eb5eb4cfaafadcc36b7d497b9fa2cb9e) fix(jsonapi): handle multiple relation classes, unrelated unions (#6320)
+* [af61482c2](https://github.com/api-platform/core/commit/af61482c21618e8abcbe7486df05e30a961bc5b6) fix(symfony)!: context stamp not serializable because of request object (#6323)
+* [fce42e0e7](https://github.com/api-platform/core/commit/fce42e0e783f3eb0331afad702d553f3bd63a2b3) fix(jsonapi): re-add continue once relation is determined (#6325)
+
+
+### Features
+
+* [57fe13615](https://github.com/api-platform/core/commit/57fe13615dfda724fd17d18658a1cdb062d261e5) feat(serializer): update MissingConstructorArgumentsException message (#5902)
+* [e867d07f5](https://github.com/api-platform/core/commit/e867d07f59b82d5f1bdca69e096ddf452dd7efc8) feat(parametervalidator): parameter validation (#6296)
+
 ## v3.3.0-beta.2
 
 ### Bug fixes
 
-* [2a8767108](https://github.com/api-platform/core/commit/2a8767108690c35d873a936f9e2383365fdb4f00) revert: fix(graphql): increment graphql normalizer priority
 * [50f4f0eeb](https://github.com/api-platform/core/commit/50f4f0eeb55c29c57d8ca63dedb0534f86f07055) fix: change deprecated ValidationException (#6295)
 * [5e908c898](https://github.com/api-platform/core/commit/5e908c898dd6dca3a6abfd3f083e4d7b4fc4e85a) fix: reorder early return QueryParameterValidateListener (#6300)
 * [678eb4f84](https://github.com/api-platform/core/commit/678eb4f8474edc29b2fc806c85aaf203540e23ab) fix(jsonapi): add missing "included" schema parts (#6277)
-* [6c3d58c28](https://github.com/api-platform/core/commit/6c3d58c287650e32ae0d68e9197424b04acdab5a) fix(jsonschema): don't try to define $ref if set in attributes (#6303)
 * [8f8121865](https://github.com/api-platform/core/commit/8f8121865aca950b64559c6aa6acad9d8bef6bda) fix(graphql): query nullish ManyToOne-Relation
 * [90c9fb31a](https://github.com/api-platform/core/commit/90c9fb31a322a2c7891fbbafb75d60b09fd67772) fix(symfony): register api_error route (#6281)
 * [93f8b5f39](https://github.com/api-platform/core/commit/93f8b5f39727ee5aa48d78d56fd7e3376b7a813a) fix(jsonapi): return empty data array for empty relation (#6270)
 * [9ac0062a2](https://github.com/api-platform/core/commit/9ac0062a2d30776b94994e419b9bcc39832540b7) fix(symfony): context not serializable when session (#6302)
-* [ba1c61ff3](https://github.com/api-platform/core/commit/ba1c61ff352a0459bfa6010c000ed5b88d4f84ee) fix(jsonapi): correct data path (#6273)
-* [d061c3811](https://github.com/api-platform/core/commit/d061c381120b858c471157dbdccbb5084a39fb04) fix(graphql): increment graphql normalizer priority (#6283)
 * [da324e457](https://github.com/api-platform/core/commit/da324e45783c425b5165a3429464efe53e6f6094) fix(metadata): index operations (#6272)
 
 ## v3.3.0-beta.1
@@ -55,7 +165,7 @@ The v3.3.0-beta.1 introduces a new `QueryParameter` attribute to improve [the fi
 ### Features
 
 * [24a1a18cb](https://github.com/api-platform/core/commit/24a1a18cbe706c5a3bb4d5602b70c0a68ff8a757) feat: improve ApiProperty::security using property name (#5853)
-* [3d1428e4d](https://github.com/api-platform/core/commit/3d1428e4d2e4342918becf098da8832ac50fef1b) feat(symfony): add getOperation Expression Language function on Mercure topics (#5854)
+* [3d1428e4d](https://github.com/api-platform/core/commit/3d1428e4d2e4342918becf098da8832ac50fef1b) feat(symfony): add get_operation Expression Language function on Mercure topics (#5854)
 * [6b00cea91](https://github.com/api-platform/core/commit/6b00cea914dc5f9c42ca237a3ff498d629a0efb8) feat(graphql): partial pagination for page based pagination (#6120)
 * [79fe01b97](https://github.com/api-platform/core/commit/79fe01b970d90e3c80880f54fc0446b5294173f0) feat(doctrine): paginators for Doctrine Collection & Selectable (#6153)
 * [89c9229f4](https://github.com/api-platform/core/commit/89c9229f484cb409ef3eb2bd88cccc6ddc856378) feat(graphql): support nullable embedded relations in GraphQL types (#6100)
@@ -80,7 +190,7 @@ The v3.3.0-beta.1 introduces a new `QueryParameter` attribute to improve [the fi
 * [cc9f6a518](https://github.com/api-platform/core/commit/cc9f6a518222598d20556fc1ec62b7c4be52bf52) feat(symfony): request and view kernel listeners (#6102)
 * [ce9ab8226](https://github.com/api-platform/core/commit/ce9ab8226934bfac45e3408e9468bf32a02aa2e9) feat(metadata): headers configuration (#6074)
 
-Components: 
+Components:
   - `api-platform/parametervalidator`
   - `api-platform/doctrine-common`
   - `api-platform/doctrine-orm`
@@ -89,7 +199,7 @@ Components:
 A new interface `ApiPlatform\Serializer\TagCollectorInterface` allows to collect cache tags (IRIs) during serialization instead of using API Platform defaults.
 An experimental feature (#5290) gives the ability to use `security` on sub resource links.
 
-If you use controllers you should use: 
+If you use controllers you should use:
 
 ```yaml
 api_platform:
@@ -106,7 +216,7 @@ The default is `false` you can get rid of the `event_listeners_backward_compatib
 class Book {}
 ```
 
-These namespaces are deprecated: 
+These namespaces are deprecated:
 
 - `ApiPlatform\Api`
 - `ApiPlatform\Exception`
@@ -124,6 +234,35 @@ api_platform:
         jsonld: ['application/ld+json']
         form: ['multipart/form-data']
 ```
+
+## v3.2.25
+
+### Bug fixes
+
+* [0ed1b637a](https://github.com/api-platform/core/commit/0ed1b637a84d0860c2e014e2473b52d17de9276b) fix(metadata): wrong schema generated if openapicontext set on array (#6431)
+
+## v3.2.24
+
+### Bug fixes
+
+* [451d50e53](https://github.com/api-platform/core/commit/451d50e538a4f7aac67d47601fee5474af99c870) fix(symfony): deprecations 7.1
+* [93e71eb82](https://github.com/api-platform/core/commit/93e71eb822aa06db2b6de303039f9b8c65cad7a8) fix(graphql): name converter with class (#6396)
+* [99314bf80](https://github.com/api-platform/core/commit/99314bf80e7c61147fb311da6403b37be5eab5b2) fix(state): handle empty request in read provider (#6403)
+
+## v3.2.23
+
+### Bug fixes
+
+* [fb7c4658c](https://github.com/api-platform/core/commit/fb7c4658c327c9628bcc86d42e85c3546a74d993) fix(test): canonicalizing json arrays (#6386)
+
+## v3.2.22
+
+### Bug fixes
+
+* [50c738cf6](https://github.com/api-platform/core/commit/50c738cf6b31bb7f2ddcd74037c12315c8bcac6d) fix(graphql): check inheritance in ResolverProvider (#6314)
+* [9cd597f80](https://github.com/api-platform/core/commit/9cd597f80d9eecafb28b4229a313ba9b9618bf8c) fix(doctrine): remove usage of deprecated ClassUtils in PurgeHttpCacheListener for Doctrine ORM 3 (#6331)
+* [a59fbee97](https://github.com/api-platform/core/commit/a59fbee97dc09b7cb7e12ee3bef9451f0fbea957) fix(serializer): uriTemplate wrong cache usage in hal format (#6313)
+* [c083af346](https://github.com/api-platform/core/commit/c083af3461a926ea68837f216eacc67ca43a6fc3) fix(metadata): allow extracting routeName from XML config (#6329)
 
 ## v3.2.21
 
@@ -271,7 +410,7 @@ Symfony 7 support.
 
 ### Bug fixes
 
-To have errors backward compatible with 3.1, use: 
+To have errors backward compatible with 3.1, use:
 
 ```yaml
 api_platform:
@@ -398,6 +537,13 @@ Listeners will not get removed in API Platform 4 but will rather use our new Pro
 ```php
 #[Post(read: true)] // to force reading even though it's a POST
 ```
+
+- `ApiPlatform\Api` got moved to `ApiPlatform\Metadata`
+
+- Adds `assertMercureUpdateMatchesJsonSchema(Update $update, array $topics, array|object|string $jsonSchema = '', bool $private = false, string $id = null, string $type = null, int $retry = null, string $message = '')`
+- The handle links feature is experimental
+
+When using GraphQl, with `event_listeners_backward_compatibility_layer: true`, mutation resolver gets called before validation, when using `false` (the future default) validation occurs on the user's input.
 
 ## v3.2.0-beta.2
 

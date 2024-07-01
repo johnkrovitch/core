@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Symfony\Bundle\DependencyInjection;
 
-use ApiPlatform\Api\FilterInterface as LegacyFilterInterface;
 use ApiPlatform\Doctrine\Odm\Extension\AggregationCollectionExtensionInterface;
 use ApiPlatform\Doctrine\Odm\Extension\AggregationItemExtensionInterface;
 use ApiPlatform\Doctrine\Odm\Filter\AbstractFilter as DoctrineMongoDbOdmAbstractFilter;
@@ -38,6 +37,7 @@ use ApiPlatform\Metadata\UrlGeneratorInterface;
 use ApiPlatform\Metadata\Util\Inflector;
 use ApiPlatform\Problem\Serializer\ConstraintViolationListNormalizer;
 use ApiPlatform\State\ApiResource\Error;
+use ApiPlatform\State\ParameterProviderInterface;
 use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\State\ProviderInterface;
 use ApiPlatform\Symfony\EventListener\AddHeadersListener;
@@ -59,12 +59,12 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
+use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpClient\ScopingHttpClient;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Uid\AbstractUid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -113,6 +113,13 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
 
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
+
+        if (null === $config['use_symfony_listeners']) {
+            $config['use_symfony_listeners'] = true;
+            trigger_deprecation('api-platform/core', '3.3', 'Setting the value of "use_symfony_listeners" will be mandatory in 4.0 as it will default to "false". Use "true" if you use Symfony Controllers or Event Listeners.');
+        }
+
+        $container->setParameter('api_platform.use_symfony_listeners', $config['use_symfony_listeners']);
 
         if (!$config['formats']) {
             trigger_deprecation('api-platform/core', '3.2', 'Setting the "formats" section will be mandatory in API Platform 4.');
@@ -187,14 +194,14 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
 
         $container->registerForAutoconfiguration(FilterInterface::class)
             ->addTag('api_platform.filter');
-        $container->registerForAutoconfiguration(LegacyFilterInterface::class)
-            ->addTag('api_platform.filter');
         $container->registerForAutoconfiguration(ProviderInterface::class)
             ->addTag('api_platform.state_provider');
         $container->registerForAutoconfiguration(ProcessorInterface::class)
             ->addTag('api_platform.state_processor');
         $container->registerForAutoconfiguration(UriVariableTransformerInterface::class)
             ->addTag('api_platform.uri_variables.transformer');
+        $container->registerForAutoconfiguration(ParameterProviderInterface::class)
+            ->addTag('api_platform.parameter_provider');
 
         if (!$container->has('api_platform.state.item_provider')) {
             $container->setAlias('api_platform.state.item_provider', 'api_platform.state_provider.object');
@@ -220,7 +227,6 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
 
         // TODO: remove in 4.x
         $container->setParameter('api_platform.event_listeners_backward_compatibility_layer', $config['event_listeners_backward_compatibility_layer']);
-        $container->setParameter('api_platform.use_symfony_listeners', $config['use_symfony_listeners']);
 
         if ($config['event_listeners_backward_compatibility_layer']) {
             trigger_deprecation('api-platform/core', '3.3', sprintf('The "event_listeners_backward_compatibility_layer" will be removed in 4.0. Use the configuration "use_symfony_listeners" to use Symfony listeners. The following listeners are deprecated and will be removed in API Platform 4.0: "%s"', implode(', ', [
@@ -520,6 +526,11 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
         }
 
         $loader->load('openapi.xml');
+
+        if (class_exists(Yaml::class)) {
+            $loader->load('openapi/yaml.xml');
+        }
+
         $loader->load('swagger_ui.xml');
 
         if ($config['event_listeners_backward_compatibility_layer']) {
@@ -530,7 +541,9 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
             $loader->load('symfony/swagger_ui.xml');
         }
 
-        $loader->load('state/swagger_ui.xml');
+        if ($config['enable_swagger_ui']) {
+            $loader->load('state/swagger_ui.xml');
+        }
 
         if (!$config['enable_swagger_ui'] && !$config['enable_re_doc']) {
             // Remove the listener but keep the controller to allow customizing the path of the UI
@@ -816,6 +829,7 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
     private function registerValidatorConfiguration(ContainerBuilder $container, array $config, XmlFileLoader $loader): void
     {
         if (interface_exists(ValidatorInterface::class)) {
+            $container->setParameter('api_platform.validator.legacy_validation_exception', $config['validator']['legacy_validation_exception'] ?? true);
             $loader->load('metadata/validator.xml');
             $loader->load('validator/validator.xml');
 
@@ -845,6 +859,7 @@ final class ApiPlatformExtension extends Extension implements PrependExtensionIn
         if (!$config['validator']['query_parameter_validation']) {
             $container->removeDefinition('api_platform.listener.view.validate_query_parameters');
             $container->removeDefinition('api_platform.validator.query_parameter_validator');
+            $container->removeDefinition('api_platform.symfony.parameter_validator');
         }
     }
 

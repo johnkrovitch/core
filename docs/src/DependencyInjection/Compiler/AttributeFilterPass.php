@@ -27,7 +27,7 @@ final class AttributeFilterPass implements CompilerPassInterface
 {
     use AttributeFilterExtractorTrait;
 
-    private const TAG_FILTER_NAME = 'api_platform.filter';
+    private const TAG_FILTER_NAME = 'api_platform.playground.filter';
 
     /**
      * {@inheritdoc}
@@ -35,7 +35,10 @@ final class AttributeFilterPass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         foreach (get_declared_classes() as $class) {
-            $this->createFilterDefinitions(new \ReflectionClass($class), $container);
+            $r = new \ReflectionClass($class);
+            if (str_contains((string) $r->getFileName(), 'guides')) {
+                $this->createFilterDefinitions($r, $container);
+            }
         }
     }
 

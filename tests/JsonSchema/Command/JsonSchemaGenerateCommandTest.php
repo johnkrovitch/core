@@ -124,9 +124,9 @@ class JsonSchemaGenerateCommandTest extends KernelTestCase
         ]);
     }
 
-    public function testArraySchemaWithMultipleUnionTypes(): void
+    public function testArraySchemaWithMultipleUnionTypesJsonLd(): void
     {
-        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\Entity\Issue6212\Nest', '--type' => 'output']);
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\Entity\Issue6212\Nest', '--type' => 'output', '--format' => 'jsonld']);
         $result = $this->tester->getDisplay();
         $json = json_decode($result, associative: true);
 
@@ -138,6 +138,38 @@ class JsonSchemaGenerateCommandTest extends KernelTestCase
 
         $this->assertArrayHasKey('Wren.jsonld', $json['definitions']);
         $this->assertArrayHasKey('Robin.jsonld', $json['definitions']);
+    }
+
+    public function testArraySchemaWithMultipleUnionTypesJsonApi(): void
+    {
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\Entity\Issue6212\Nest', '--type' => 'output', '--format' => 'jsonapi']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+
+        $this->assertEquals($json['definitions']['Nest.jsonapi']['properties']['data']['properties']['attributes']['properties']['owner']['anyOf'], [
+            ['$ref' => '#/definitions/Wren.jsonapi'],
+            ['$ref' => '#/definitions/Robin.jsonapi'],
+            ['type' => 'null'],
+        ]);
+
+        $this->assertArrayHasKey('Wren.jsonapi', $json['definitions']);
+        $this->assertArrayHasKey('Robin.jsonapi', $json['definitions']);
+    }
+
+    public function testArraySchemaWithMultipleUnionTypesJsonHal(): void
+    {
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\Entity\Issue6212\Nest', '--type' => 'output', '--format' => 'jsonhal']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+
+        $this->assertEquals($json['definitions']['Nest.jsonhal']['properties']['owner']['anyOf'], [
+            ['$ref' => '#/definitions/Wren.jsonhal'],
+            ['$ref' => '#/definitions/Robin.jsonhal'],
+            ['type' => 'null'],
+        ]);
+
+        $this->assertArrayHasKey('Wren.jsonhal', $json['definitions']);
+        $this->assertArrayHasKey('Robin.jsonhal', $json['definitions']);
     }
 
     /**
@@ -196,10 +228,108 @@ class JsonSchemaGenerateCommandTest extends KernelTestCase
         $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\Entity\Question', '--type' => 'output', '--format' => 'jsonapi']);
         $result = $this->tester->getDisplay();
         $json = json_decode($result, associative: true);
+        $properties = $json['definitions']['Question.jsonapi']['properties']['data']['properties'];
+        $included = $json['definitions']['Question.jsonapi']['properties']['included'];
 
-        $this->assertArrayHasKey('answer', $json['definitions']['Question.jsonapi']['properties']['data']['properties']['relationships']['properties']);
-        $this->assertArrayHasKey('anyOf', $json['definitions']['Question.jsonapi']['properties']['included']['items']);
-        $this->assertArrayHasKey('$ref', $json['definitions']['Question.jsonapi']['properties']['included']['items']['anyOf'][0]);
-        $this->assertSame('#/definitions/Answer.jsonapi', $json['definitions']['Question.jsonapi']['properties']['included']['items']['anyOf'][0]['$ref']);
+        $this->assertArrayHasKey('answer', $properties['relationships']['properties']);
+        $this->assertArrayHasKey('anyOf', $included['items']);
+        $this->assertCount(1, $included['items']['anyOf']);
+        $this->assertArrayHasKey('$ref', $included['items']['anyOf'][0]);
+        $this->assertSame('#/definitions/Answer.jsonapi', $included['items']['anyOf'][0]['$ref']);
+
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\ApiResource\AnimalObservation', '--type' => 'output', '--format' => 'jsonapi']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+        $properties = $json['definitions']['AnimalObservation.jsonapi']['properties']['data']['properties'];
+        $included = $json['definitions']['AnimalObservation.jsonapi']['properties']['included'];
+
+        $this->assertArrayHasKey('individuals', $properties['relationships']['properties']);
+        $this->assertArrayNotHasKey('individuals', $properties['attributes']['properties']);
+        $this->assertArrayHasKey('anyOf', $included['items']);
+        $this->assertCount(1, $included['items']['anyOf']);
+        $this->assertSame('#/definitions/Animal.jsonapi', $included['items']['anyOf'][0]['$ref']);
+
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\ApiResource\Animal', '--type' => 'output', '--format' => 'jsonapi']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+        $properties = $json['definitions']['Animal.jsonapi']['properties']['data']['properties'];
+        $included = $json['definitions']['Animal.jsonapi']['properties']['included'];
+
+        $this->assertArrayHasKey('species', $properties['relationships']['properties']);
+        $this->assertArrayNotHasKey('species', $properties['attributes']['properties']);
+        $this->assertArrayHasKey('anyOf', $included['items']);
+        $this->assertCount(1, $included['items']['anyOf']);
+        $this->assertSame('#/definitions/Species.jsonapi', $included['items']['anyOf'][0]['$ref']);
+
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\ApiResource\Species', '--type' => 'output', '--format' => 'jsonapi']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+        $properties = $json['definitions']['Species.jsonapi']['properties']['data']['properties'];
+
+        $this->assertArrayHasKey('kingdom', $properties['attributes']['properties']);
+        $this->assertArrayHasKey('phylum', $properties['attributes']['properties']);
+    }
+
+    /**
+     * Test issue #6317.
+     */
+    public function testBackedEnumExamplesAreNotLost(): void
+    {
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\ApiResource\Issue6317\Issue6317', '--type' => 'output', '--format' => 'jsonld']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+        $properties = $json['definitions']['Issue6317.jsonld']['properties'];
+
+        $this->assertArrayHasKey('example', $properties['id']);
+        $this->assertArrayHasKey('example', $properties['name']);
+        // jsonldContext
+        $this->assertArrayNotHasKey('example', $properties['ordinal']);
+        // openapiContext
+        $this->assertArrayNotHasKey('example', $properties['cardinal']);
+    }
+
+    public function testResourceWithEnumPropertiesSchema(): void
+    {
+        $this->tester->run(['command' => 'api:json-schema:generate', 'resource' => 'ApiPlatform\Tests\Fixtures\TestBundle\ApiResource\ResourceWithEnumProperty', '--type' => 'output', '--format' => 'jsonld']);
+        $result = $this->tester->getDisplay();
+        $json = json_decode($result, associative: true);
+        $properties = $json['definitions']['ResourceWithEnumProperty.jsonld']['properties'];
+
+        $this->assertSame(
+            [
+                'type' => ['string', 'null'],
+                'format' => 'iri-reference',
+                'example' => 'https://example.com/',
+            ],
+            $properties['intEnum']
+        );
+        $this->assertSame(
+            [
+                'type' => 'array',
+                'items' => [
+                    'type' => 'string',
+                    'format' => 'iri-reference',
+                    'example' => 'https://example.com/',
+                ],
+            ],
+            $properties['stringEnum']
+        );
+        $this->assertSame(
+            [
+                'type' => ['string', 'null'],
+                'enum' => ['male', 'female', null],
+            ],
+            $properties['gender']
+        );
+        $this->assertSame(
+            [
+                'type' => 'array',
+                'items' => [
+                    'type' => 'string',
+                    'enum' => ['male', 'female'],
+                ],
+            ],
+            $properties['genders']
+        );
     }
 }

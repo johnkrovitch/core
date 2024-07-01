@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace ApiPlatform\Metadata;
 
 use ApiPlatform\OpenApi;
-use ApiPlatform\State\ProviderInterface;
+use ApiPlatform\State\ParameterProviderInterface;
+use Symfony\Component\Validator\Constraint;
 
 /**
  * @experimental
@@ -22,21 +23,23 @@ use ApiPlatform\State\ProviderInterface;
 abstract class Parameter
 {
     /**
-     * @param array{type?: string}|null              $schema
-     * @param array<string, mixed>                   $extraProperties
-     * @param ProviderInterface|callable|string|null $provider
-     * @param FilterInterface|string|null            $filter
+     * @param array{type?: string}|null                       $schema
+     * @param array<string, mixed>                            $extraProperties
+     * @param ParameterProviderInterface|callable|string|null $provider
+     * @param FilterInterface|string|null                     $filter
+     * @param Constraint|Constraint[]|null                    $constraints
      */
     public function __construct(
         protected ?string $key = null,
         protected ?array $schema = null,
-        protected ?OpenApi\Model\Parameter $openApi = null,
+        protected OpenApi\Model\Parameter|bool|null $openApi = null, // TODO: use false as type instead of bool
         protected mixed $provider = null,
         protected mixed $filter = null,
         protected ?string $property = null,
         protected ?string $description = null,
         protected ?bool $required = null,
         protected ?int $priority = null,
+        protected Constraint|array|null $constraints = null,
         protected ?array $extraProperties = [],
     ) {
     }
@@ -54,7 +57,7 @@ abstract class Parameter
         return $this->schema;
     }
 
-    public function getOpenApi(): ?OpenApi\Model\Parameter
+    public function getOpenApi(): OpenApi\Model\Parameter|bool|null
     {
         return $this->openApi;
     }
@@ -87,6 +90,14 @@ abstract class Parameter
     public function getPriority(): ?int
     {
         return $this->priority;
+    }
+
+    /**
+     * @return Constraint|Constraint[]|null
+     */
+    public function getConstraints(): Constraint|array|null
+    {
+        return $this->constraints;
     }
 
     /**
@@ -133,7 +144,7 @@ abstract class Parameter
     }
 
     /**
-     * @param ProviderInterface|string $provider
+     * @param ParameterProviderInterface|string $provider
      */
     public function withProvider(mixed $provider): static
     {
@@ -174,6 +185,14 @@ abstract class Parameter
     {
         $self = clone $this;
         $self->required = $required;
+
+        return $self;
+    }
+
+    public function withConstraints(array|Constraint $constraints): static
+    {
+        $self = clone $this;
+        $self->constraints = $constraints;
 
         return $self;
     }

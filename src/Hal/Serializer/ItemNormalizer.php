@@ -67,9 +67,8 @@ final class ItemNormalizer extends AbstractItemNormalizer
         }
 
         $context = $this->initContext($resourceClass, $context);
-        $iri = $this->iriConverter->getIriFromResource($object, UrlGeneratorInterface::ABS_PATH, $context['operation'] ?? null, $context);
 
-        $context['iri'] = $iri;
+        $iri = $context['iri'] ??= $this->iriConverter->getIriFromResource($object, UrlGeneratorInterface::ABS_PATH, $context['operation'] ?? null, $context);
         $context['object'] = $object;
         $context['format'] = $format;
         $context['api_normalize'] = true;
@@ -186,6 +185,7 @@ final class ItemNormalizer extends AbstractItemNormalizer
 
                     $relation['iri'] = $this->iriConverter->getIriFromResource($object, UrlGeneratorInterface::ABS_PATH, $operation, $childContext);
                     $relation['operation'] = $operation;
+                    $cacheKey = null;
                 }
 
                 if ($propertyMetadata->isReadableLink()) {
@@ -202,7 +202,7 @@ final class ItemNormalizer extends AbstractItemNormalizer
             }
         }
 
-        if (false !== $context['cache_key']) {
+        if ($cacheKey && false !== $context['cache_key']) {
             $this->componentsCache[$cacheKey] = $components;
         }
 

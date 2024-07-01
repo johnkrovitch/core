@@ -13,20 +13,19 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Symfony\EventListener;
 
-use ApiPlatform\Api\UriVariablesConverterInterface as LegacyUriVariablesConverterInterface;
-use ApiPlatform\Exception\InvalidIdentifierException;
-use ApiPlatform\Exception\InvalidUriVariableException;
 use ApiPlatform\Metadata\Error;
+use ApiPlatform\Metadata\Exception\InvalidIdentifierException;
+use ApiPlatform\Metadata\Exception\InvalidUriVariableException;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\UriVariablesConverterInterface;
 use ApiPlatform\Metadata\Util\CloneTrait;
-use ApiPlatform\Serializer\SerializerContextBuilderInterface;
 use ApiPlatform\State\CallableProvider;
 use ApiPlatform\State\Exception\ProviderNotFoundException;
 use ApiPlatform\State\Provider\ReadProvider;
 use ApiPlatform\State\ProviderInterface;
+use ApiPlatform\State\SerializerContextBuilderInterface;
 use ApiPlatform\State\UriVariablesResolverTrait;
 use ApiPlatform\State\Util\OperationRequestInitiatorTrait;
 use ApiPlatform\State\Util\RequestParser;
@@ -49,7 +48,7 @@ final class ReadListener
         private readonly ProviderInterface $provider,
         ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null,
         private readonly ?SerializerContextBuilderInterface $serializerContextBuilder = null,
-        LegacyUriVariablesConverterInterface|UriVariablesConverterInterface|null $uriVariablesConverter = null,
+        ?UriVariablesConverterInterface $uriVariablesConverter = null,
     ) {
         $this->resourceMetadataCollectionFactory = $resourceMetadataCollectionFactory;
         $this->uriVariablesConverter = $uriVariablesConverter;
@@ -84,7 +83,9 @@ final class ReadListener
                 try {
                     $uriVariables = $this->getOperationUriVariables($operation, $request->attributes->all(), $operation->getClass());
                 } catch (InvalidIdentifierException|InvalidUriVariableException $e) {
-                    throw new NotFoundHttpException('Invalid identifier value or configuration.', $e);
+                    if ($operation->canRead()) {
+                        throw new NotFoundHttpException('Invalid identifier value or configuration.', $e);
+                    }
                 }
             }
 
