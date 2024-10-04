@@ -14,22 +14,21 @@ declare(strict_types=1);
 namespace Workbench\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use Workbench\App\Models\Vault;
+use Workbench\App\Models\WithAccessor;
 
 /**
- * @template TModel of \Workbench\App\Models\Vault
+ * @template TModel of \Workbench\App\Models\WithAccessor
  *
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<TModel>
  */
-class VaultFactory extends Factory
+class WithAccessorFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var class-string<TModel>
      */
-    protected $model = Vault::class;
+    protected $model = WithAccessor::class;
 
     /**
      * Define the model's default state.
@@ -39,7 +38,7 @@ class VaultFactory extends Factory
     public function definition(): array
     {
         return [
-            'secret' => Str::random(10),
+            'name' => strtolower(fake()->name()),
         ];
     }
 }
