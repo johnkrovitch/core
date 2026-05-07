@@ -27,7 +27,7 @@ final class DefaultParametersTest extends ApiTestCase
 
     protected static function getKernelClass(): string
     {
-        return DefaultParametersAppKernel::class;
+        return \DefaultParametersAppKernel::class;
     }
 
     /**
