@@ -81,7 +81,7 @@ class AppKernel extends Kernel
             new MakerBundle(),
         ];
 
-        if (null === ($_ENV['APP_PHPUNIT'] ?? null)) {
+        if (null === ($_ENV['APP_PHPUNIT'] ?? null) && class_exists(FriendsOfBehatSymfonyExtensionBundle::class)) {
             $bundles[] = new FriendsOfBehatSymfonyExtensionBundle();
         }
 
@@ -120,7 +120,10 @@ class AppKernel extends Kernel
 
         $loader->load(__DIR__."/config/config_{$this->getEnvironment()}.yml");
 
-        $c->getDefinition(DoctrineContext::class)->setArgument('$passwordHasher', class_exists(NativePasswordHasher::class) ? 'security.user_password_encoder' : 'security.user_password_hasher');
+        if (interface_exists(Behat\Behat\Context\Context::class) && class_exists(DoctrineContext::class)) {
+            $loader->load(__DIR__.('mongodb' === $this->getEnvironment() ? '/config/config_behat_mongodb.yml' : '/config/config_behat_orm.yml'));
+            $c->getDefinition(DoctrineContext::class)->setArgument('$passwordHasher', class_exists(NativePasswordHasher::class) ? 'security.user_password_encoder' : 'security.user_password_hasher');
+        }
 
         $messengerConfig = [
             'default_bus' => 'messenger.bus.default',
