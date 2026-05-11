@@ -1,5 +1,20 @@
 # Changelog
 
+## v4.3.5
+
+### Bug fixes
+
+* [78c4ddf02](https://github.com/api-platform/core/commit/78c4ddf0241e2af5738fe67e853734d9b4c74566) fix(symfony): Symfony 8.1 compatibility (#7955)
+* [14d5e8279](https://github.com/api-platform/core/commit/14d5e8279b646934c0deff18df378d6618a374e8) fix(symfony): api_platform_iris loader misses item Gets and api_genid (#7946)
+* [f88b9122f](https://github.com/api-platform/core/commit/f88b9122fe398b69fb16a69e87894076217a0224) fix(hydra): emit hydra:next and hydra:previous on empty cursor-paginated collections (#7961)
+* [1721a7366](https://github.com/api-platform/core/commit/1721a736624240801341f151084633a92d8889d0) fix(mcp): jsonld schema handle oneOf and anyOf (#7962)
+* [03ca10c17](https://github.com/api-platform/core/commit/03ca10c17ce384e008a344067cc4ba48467d758c) fix(mcp): add title support to Tool
+* [30a8e9ef0](https://github.com/api-platform/core/commit/30a8e9ef07d348e6b55d67c750f5ff2eaa2fe2c6) fix(laravel): inject missing dependencies into HydraSchemaFactory (#7963)
+* [173dc6631](https://github.com/api-platform/core/commit/173dc663144d44ad16a1f9ac747eeb34a8832c2d) fix(laravel): fall back to resource class when object is null in ResourceAccessChecker (#7948)
+* [445529519](https://github.com/api-platform/core/commit/4455295191f36578cefd882c263295fd9fce33a7) fix(laravel): don't cache empty Eloquent attributes for missing table
+* [67d7a3dc2](https://github.com/api-platform/core/commit/67d7a3dc2e83b60bc4bd4025cd8602d46b44e2fc) fix(laravel): use lowercase asc/desc for Eloquent orderBy
+* [85f6269c3](https://github.com/api-platform/core/commit/85f6269c32d3ae7b14e7df13a6844c61229ee50a) fix(laravel): expose ReDoc/Scalar in docs footer
+
 ## v4.3.4
 
 ### Bug fixes
