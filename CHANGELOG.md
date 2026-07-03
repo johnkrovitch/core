@@ -1,5 +1,21 @@
 # Changelog
 
+## v4.3.16
+
+### Bug fixes
+
+* [328cb67ce](https://github.com/api-platform/core/commit/328cb67ceda3d934d8985fb0f7e08542f59fb38d) fix(symfony): don't expose entrypoint in openapi format (#8383)
+* [340e982c2](https://github.com/api-platform/core/commit/340e982c22ebc6c4cf45a6f481151f668722eaf9) fix(test): remove stale phpstan ignores in CollectionNormalizerTest (#8384)
+* [43e3b4cf7](https://github.com/api-platform/core/commit/43e3b4cf716ed7b0d3962b5e022d065a2bb746c9) fix(openapi): don't apply the global name converter to the generated document (#8360)
+* [48e8f9781](https://github.com/api-platform/core/commit/48e8f97816a945d205b0cfaf4c76cc532c143312) fix(doctrine): use PHP property name in DQL for modern filters with name converter (#8382)
+* [66829859f](https://github.com/api-platform/core/commit/66829859fac0fe0363b8a91fd338d3ab71877774) fix(doctrine): support filtering scalar enum columns by IRI (#8358)
+* [71918e464](https://github.com/api-platform/core/commit/71918e4644ed2f6ce1ff8514b9ee87a57f074285) fix(jsonschema): respect readableLink for resource-typed properties on non-resource parents (#8362)
+* [798b4cc53](https://github.com/api-platform/core/commit/798b4cc53dee7ef1e8dd8042668bbf9f8086b746) fix(serializer): denormalize nullable collections of enums/objects (#8381)
+* [a9c1b538c](https://github.com/api-platform/core/commit/a9c1b538cb48ee5e629ed3909ce56653970c8889) fix: clone Parameters before mutation in security and validator providers (#8378)
+* [f1f33cac9](https://github.com/api-platform/core/commit/f1f33cac9a15331bc940654d37bf9fd9828d0c28) fix(ci): link monorepo root in laravel e2e so siblings resolve from working tree (#8363)
+* [f9d3706bb](https://github.com/api-platform/core/commit/f9d3706bb583f3a7dd74be1cc94729e49cc0611c) fix(mcp): make tools/list resilient to an empty registry (#8371)
+* [fe84af236](https://github.com/api-platform/core/commit/fe84af2365244055737df73f888f7aa3888f462e) fix(symfony): allow null $data in PlaceholderAction (#8359)
+
 ## v4.3.15
 
 ### Bug fixes
