@@ -1,5 +1,26 @@
 # Changelog
 
+## v5.0.0-alpha.2
+
+### Breaking changes
+
+* [e22e74464](https://github.com/api-platform/core/commit/e22e74464e49d0dc0bd86e7407f1e19b6c5db9ca) feat!: remove deprecated APIs scheduled for 5.0 (#8367)
+* [4a9a14507](https://github.com/api-platform/core/commit/4a9a14507e5ca97c85fcf8dd1e240008f000c525) feat!: remove the legacy PropertyInfo Type system, use symfony/type-info (#8364)
+* [1e6d13ae1](https://github.com/api-platform/core/commit/1e6d13ae117471dd6e549cd1cc5dc8816d5804fd) feat!: core 5.0 cleanups — PropertyAwareFilterInterface::getProperties(), JSON:API status as string (#8366)
+
+### Features
+
+* [d37a75379](https://github.com/api-platform/core/commit/d37a753790f8a8e1481a118b6a8fc9a08f57e962) feat(doctrine): standalone Date/Exists filters, ComparisonFilter [between], deprecate RangeFilter (#8351)
+
+### Bug fixes
+
+* [88f458a11](https://github.com/api-platform/core/commit/88f458a1108ba2fcd052a58d7647f23dad1b186b) fix(jsonschema): drop removed getBuiltinTypes path in SchemaPropertyMetadataFactory
+
+### Dependencies
+
+* Require `symfony/*` `^7.4 || ^8.0` across all components; drop support for Symfony 6.4 and 7.0–7.3 (#8397)
+* Stabilize formerly `@experimental` APIs (Elasticsearch, State parameter providers, PropertyAwareFilterInterface, Laravel); `@experimental` kept only on MCP (#8365)
+
 ## v4.4.0-alpha.2
 
 ### Bug fixes
