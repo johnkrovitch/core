@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.3.17
+
+### Bug fixes
+
+* [079c7461f](https://github.com/api-platform/core/commit/079c7461f947714f15bb29b41fb143ed4bb171ea) fix(openapi): don't inherit name converter from a possibly-missing Symfony parent (#8386)
+* [3d48a4aa4](https://github.com/api-platform/core/commit/3d48a4aa4d87f1fa80fe19361393d645d0d013c2) fix(serializer): preserve denormalization errors for nullable object properties (#8393)
+* [56de59737](https://github.com/api-platform/core/commit/56de59737c53e18120ed0b9b6c40633c109d58c2) fix(doctrine): fetch_data=false reference for stateOptions resources (#8387)
+* [b396ff938](https://github.com/api-platform/core/commit/b396ff938272280a26d38d89011970dcee56d721) fix(serializer): report enum backing type in denormalization violations (#8389)
+
 ## v4.3.16
 
 ### Bug fixes
