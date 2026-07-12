@@ -38,6 +38,31 @@
 * [c9e5071d9](https://github.com/api-platform/core/commit/c9e5071d973caedeb9b554f885dedbc89743b93d) feat(symfony): deprecate Symfony Security AccessDeniedException (#8318)
 * [cc0ae1254](https://github.com/api-platform/core/commit/cc0ae1254acaf9742c7f899dd24a14d46c89ca6e) feat: support dynamic HTTP response status code via request attribute (#7904)
 
+## v4.3.17
+
+### Bug fixes
+
+* [079c7461f](https://github.com/api-platform/core/commit/079c7461f947714f15bb29b41fb143ed4bb171ea) fix(openapi): don't inherit name converter from a possibly-missing Symfony parent (#8386)
+* [3d48a4aa4](https://github.com/api-platform/core/commit/3d48a4aa4d87f1fa80fe19361393d645d0d013c2) fix(serializer): preserve denormalization errors for nullable object properties (#8393)
+* [56de59737](https://github.com/api-platform/core/commit/56de59737c53e18120ed0b9b6c40633c109d58c2) fix(doctrine): fetch_data=false reference for stateOptions resources (#8387)
+* [b396ff938](https://github.com/api-platform/core/commit/b396ff938272280a26d38d89011970dcee56d721) fix(serializer): report enum backing type in denormalization violations (#8389)
+
+## v4.3.16
+
+### Bug fixes
+
+* [328cb67ce](https://github.com/api-platform/core/commit/328cb67ceda3d934d8985fb0f7e08542f59fb38d) fix(symfony): don't expose entrypoint in openapi format (#8383)
+* [340e982c2](https://github.com/api-platform/core/commit/340e982c22ebc6c4cf45a6f481151f668722eaf9) fix(test): remove stale phpstan ignores in CollectionNormalizerTest (#8384)
+* [43e3b4cf7](https://github.com/api-platform/core/commit/43e3b4cf716ed7b0d3962b5e022d065a2bb746c9) fix(openapi): don't apply the global name converter to the generated document (#8360)
+* [48e8f9781](https://github.com/api-platform/core/commit/48e8f97816a945d205b0cfaf4c76cc532c143312) fix(doctrine): use PHP property name in DQL for modern filters with name converter (#8382)
+* [66829859f](https://github.com/api-platform/core/commit/66829859fac0fe0363b8a91fd338d3ab71877774) fix(doctrine): support filtering scalar enum columns by IRI (#8358)
+* [71918e464](https://github.com/api-platform/core/commit/71918e4644ed2f6ce1ff8514b9ee87a57f074285) fix(jsonschema): respect readableLink for resource-typed properties on non-resource parents (#8362)
+* [798b4cc53](https://github.com/api-platform/core/commit/798b4cc53dee7ef1e8dd8042668bbf9f8086b746) fix(serializer): denormalize nullable collections of enums/objects (#8381)
+* [a9c1b538c](https://github.com/api-platform/core/commit/a9c1b538cb48ee5e629ed3909ce56653970c8889) fix: clone Parameters before mutation in security and validator providers (#8378)
+* [f1f33cac9](https://github.com/api-platform/core/commit/f1f33cac9a15331bc940654d37bf9fd9828d0c28) fix(ci): link monorepo root in laravel e2e so siblings resolve from working tree (#8363)
+* [f9d3706bb](https://github.com/api-platform/core/commit/f9d3706bb583f3a7dd74be1cc94729e49cc0611c) fix(mcp): make tools/list resilient to an empty registry (#8371)
+* [fe84af236](https://github.com/api-platform/core/commit/fe84af2365244055737df73f888f7aa3888f462e) fix(symfony): allow null $data in PlaceholderAction (#8359)
+
 ## v4.3.15
 
 ### Bug fixes
