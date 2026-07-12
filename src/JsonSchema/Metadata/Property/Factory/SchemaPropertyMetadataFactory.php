@@ -70,9 +70,12 @@ final class SchemaPropertyMetadataFactory implements PropertyMetadataFactoryInte
         // on output the serializer embeds the relation as soon as gen_id is false, even when it is not a readable link (see AbstractItemNormalizer::normalizeRelation())
         $link = $isInput ? $propertyMetadata->isWritableLink() : ($propertyMetadata->isReadableLink() || false === $propertyMetadata->getGenId());
 
-        // on output a non-resource object is serialized by the standard object normalizer, which embeds related resources regardless of readableLink (see AbstractItemNormalizer::supportsNormalization())
+        // on output a non-resource object is serialized by the standard object normalizer, which embeds non-resource properties regardless of readableLink (see AbstractItemNormalizer::supportsNormalization())
+        // For resource-typed properties however, the circular reference handler (see AbstractItemNormalizer::$defaultContext) may produce an IRI, so isReadableLink should determine the schema
         if (!$isInput && !$this->isResourceClass($resourceClass)) {
-            $link = true;
+            if (!$propertyMetadata->getNativeType()?->isSatisfiedBy(fn (Type $t) => $t instanceof ObjectType && $this->resourceClassResolver->isResourceClass($t->getClassName()))) {
+                $link = true;
+            }
         }
 
         $propertySchema = $propertyMetadata->getSchema() ?? [];
