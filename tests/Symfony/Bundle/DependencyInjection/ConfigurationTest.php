@@ -246,6 +246,7 @@ class ConfigurationTest extends TestCase
                 'allow_client_generated_id' => false,
             ],
             'enable_scalar' => true,
+            'enable_head_request_optimization' => true,
         ], $config);
     }
 
